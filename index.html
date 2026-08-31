@@ -1,0 +1,996 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CPU Scheduling Simulator</title>
+    <meta name="description" content="Interactive CPU Scheduling Simulator with real-time Gantt charts, metrics, Ready Queue & CPU animation, and algorithm comparisons." />
+    <meta property="og:title" content="CPU Scheduling Simulator" />
+    <meta property="og:description" content="Interactive CPU Scheduling Simulator with real-time Gantt charts, metrics, Ready Queue & CPU animation, and algorithm comparisons." />
+    <meta property="og:type" content="website" />
+
+    <!-- Bootstrap 5 CSS via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
+    <!-- Bootstrap Icons via CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Custom High Density Stylesheet -->
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1090;"></div>
+
+    <!-- High Density Navigation Header -->
+    <header class="navbar navbar-expand-lg navbar-custom">
+      <div class="container-fluid px-3 px-lg-4">
+        <a class="navbar-brand d-flex align-items-center gap-2 text-decoration-none py-0" href="#simulator">
+          <div class="nav-brand-box">
+            <svg class="bi" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="nav-title-main">CPU SCHEDULING SIMULATOR</div>
+          </div>
+        </a>
+
+        <button class="navbar-toggler py-1 px-2 border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon" style="filter: invert(0.8);"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+          <nav class="navbar-nav mx-auto mb-2 mb-lg-0 align-items-lg-center gap-1">
+            <a class="nav-link nav-link-density active" href="#simulator"><i class="bi bi-sliders"></i> Simulator</a>
+            <a class="nav-link nav-link-density" href="#results"><i class="bi bi-table"></i> Results</a>
+            <a class="nav-link nav-link-density" href="#comparison"><i class="bi bi-bar-chart-fill"></i> Comparison</a>
+            <a class="nav-link nav-link-density" href="#algorithms"><i class="bi bi-book-half"></i> Theory</a>
+            <a class="nav-link nav-link-density" href="#formulas"><i class="bi bi-calculator"></i> Formulas</a>
+          </nav>
+          
+          <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
+            <button class="btn-density-primary" onclick="runSimulation(true)" id="headerRunBtn">
+              <i class="bi bi-play-fill"></i> Run Simulation
+            </button>
+            <button class="btn-density-outline" onclick="loadTestCase(1)" id="headerResetBtn">
+              <i class="bi bi-arrow-counterclockwise"></i> Reset
+            </button>
+            <button id="themeToggleBtn" class="btn btn-sm btn-density-outline px-2" onclick="toggleTheme()" title="Toggle Dark/Light theme">
+              <i class="bi bi-sun-fill text-warning"></i>
+              <span class="d-none d-sm-inline ms-1 font-mono text-xs">Light</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Simulator Container -->
+    <main class="container-fluid px-3 px-lg-4 py-3" id="simulator">
+      
+      <!-- Preset Test Cases Bar -->
+      <div class="app-card p-2 px-3 mb-3">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <span class="section-indicator-bar" style="background-color: var(--accent-warning);"></span>
+            <span class="text-secondary fw-bold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.06em;">Preset Benchmarks:</span>
+          </div>
+          <div class="d-flex flex-wrap gap-1">
+            <button class="preset-btn" onclick="loadTestCase(1)">
+              <i class="bi bi-1-circle me-1 text-primary"></i> Basic Default
+            </button>
+            <button class="preset-btn" onclick="loadTestCase(2)">
+              <i class="bi bi-2-circle me-1 text-primary"></i> Same Arrival (AT=0)
+            </button>
+            <button class="preset-btn" onclick="loadTestCase(3)">
+              <i class="bi bi-3-circle me-1 text-primary"></i> CPU Idle Gaps
+            </button>
+            <button class="preset-btn" onclick="loadTestCase(4)">
+              <i class="bi bi-4-circle me-1 text-primary"></i> Priority Workload
+            </button>
+            <button class="preset-btn" onclick="loadTestCase(5)">
+              <i class="bi bi-5-circle me-1 text-primary"></i> Round Robin (q=2)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        
+        <!-- LEFT COLUMN: Process Configuration & Algorithm Selection -->
+        <div class="col-12 col-xl-5">
+          
+          <!-- 1. Process Configuration Card -->
+          <div class="app-card mb-3" id="processConfigCard">
+            <div class="card-header-density">
+              <div class="section-indicator-title">
+                <span class="section-indicator-bar"></span>
+                <span>Process Configuration</span>
+                <span class="badge bg-secondary font-mono ms-1" id="processCountBadge">5 Processes</span>
+              </div>
+              <div class="d-flex gap-1">
+                <button class="btn btn-density-primary btn-density-sm" onclick="addProcess()" title="Add new process">
+                  <i class="bi bi-plus-lg"></i> Add
+                </button>
+                <button class="btn btn-density-outline btn-density-sm" onclick="generateRandomProcesses()" title="Randomize processes">
+                  <i class="bi bi-shuffle"></i> Random
+                </button>
+                <button class="btn btn-density-outline btn-density-sm text-danger" onclick="clearAllProcesses()" title="Clear table">
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="p-2 px-3">
+              <div class="table-responsive">
+                <table class="table custom-table table-hover align-middle text-nowrap" id="processTable">
+                  <thead>
+                    <tr>
+                      <th style="width: 25%;">ID</th>
+                      <th class="text-center" style="width: 25%;">Arrival (AT)</th>
+                      <th class="text-center" style="width: 25%;">Burst (BT)</th>
+                      <th class="text-center" style="width: 20%;">Priority</th>
+                      <th class="text-center" style="width: 5%;"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="processTableBody">
+                    <!-- Populated via JavaScript -->
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="d-flex flex-wrap justify-content-between align-items-center mt-2 pt-2 border-top border-secondary-subtle">
+                <small class="text-muted" id="processConfigInfoNote" style="font-size: 0.72rem;">
+                  <i class="bi bi-info-circle me-1"></i> FCFS requires Arrival Time (AT) and Burst Time (BT).
+                </small>
+                <button class="btn btn-sm btn-density-outline btn-density-sm" onclick="addProcess()">
+                  <i class="bi bi-plus-lg me-1"></i> Add Process Row
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Algorithm Selection Card -->
+          <div class="app-card mb-3" id="algorithmCard">
+            <div class="card-header-density">
+              <div class="section-indicator-title">
+                <span class="section-indicator-bar"></span>
+                <span>Algorithm Select</span>
+              </div>
+              <span id="algoPreemptionBadge" class="algo-badge bg-success-subtle text-success border border-success-subtle">
+                Non-Preemptive
+              </span>
+            </div>
+
+            <div class="p-3">
+              <div class="row g-2 mb-2">
+                
+                <!-- FCFS -->
+                <div class="col-12 col-sm-6">
+                  <label class="algo-card-label" for="algo_fcfs">
+                    <input type="radio" id="algo_fcfs" name="algoRadio" value="FCFS" checked />
+                    <div class="algo-card-inner">
+                      <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-bold" style="font-size: 0.82rem;">FCFS</span>
+                        <span class="algo-badge bg-success-subtle text-success">NP</span>
+                      </div>
+                      <small class="text-muted d-block" style="font-size: 0.7rem;">First Come, First Served</small>
+                    </div>
+                  </label>
+                </div>
+
+                <!-- SJF Non-Preemptive -->
+                <div class="col-12 col-sm-6">
+                  <label class="algo-card-label" for="algo_sjf_np">
+                    <input type="radio" id="algo_sjf_np" name="algoRadio" value="SJF_NP" />
+                    <div class="algo-card-inner">
+                      <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-bold" style="font-size: 0.82rem;">SJF (NP)</span>
+                        <span class="algo-badge bg-success-subtle text-success">NP</span>
+                      </div>
+                      <small class="text-muted d-block" style="font-size: 0.7rem;">Shortest Job First</small>
+                    </div>
+                  </label>
+                </div>
+
+                <!-- SRTF (Preemptive SJF) -->
+                <div class="col-12 col-sm-6">
+                  <label class="algo-card-label" for="algo_srtf">
+                    <input type="radio" id="algo_srtf" name="algoRadio" value="SRTF" />
+                    <div class="algo-card-inner">
+                      <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-bold" style="font-size: 0.82rem;">SRTF</span>
+                        <span class="algo-badge bg-primary-subtle text-primary">Preemptive</span>
+                      </div>
+                      <small class="text-muted d-block" style="font-size: 0.7rem;">Shortest Remaining Time</small>
+                    </div>
+                  </label>
+                </div>
+
+                <!-- Priority Non-Preemptive -->
+                <div class="col-12 col-sm-6">
+                  <label class="algo-card-label" for="algo_priority_np">
+                    <input type="radio" id="algo_priority_np" name="algoRadio" value="PRIORITY_NP" />
+                    <div class="algo-card-inner">
+                      <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-bold" style="font-size: 0.82rem;">Priority (NP)</span>
+                        <span class="algo-badge bg-success-subtle text-success">NP</span>
+                      </div>
+                      <small class="text-muted d-block" style="font-size: 0.7rem;">Priority Non-Preemptive</small>
+                    </div>
+                  </label>
+                </div>
+
+                <!-- Priority Preemptive -->
+                <div class="col-12 col-sm-6">
+                  <label class="algo-card-label" for="algo_priority_p">
+                    <input type="radio" id="algo_priority_p" name="algoRadio" value="PRIORITY_P" />
+                    <div class="algo-card-inner">
+                      <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-bold" style="font-size: 0.82rem;">Priority (P)</span>
+                        <span class="algo-badge bg-primary-subtle text-primary">Preemptive</span>
+                      </div>
+                      <small class="text-muted d-block" style="font-size: 0.7rem;">Priority Preemptive</small>
+                    </div>
+                  </label>
+                </div>
+
+                <!-- Round Robin -->
+                <div class="col-12 col-sm-6">
+                  <label class="algo-card-label" for="algo_rr">
+                    <input type="radio" id="algo_rr" name="algoRadio" value="RR" />
+                    <div class="algo-card-inner">
+                      <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-bold" style="font-size: 0.82rem;">Round Robin</span>
+                        <span class="algo-badge bg-primary-subtle text-primary">Preemptive</span>
+                      </div>
+                      <small class="text-muted d-block" style="font-size: 0.7rem;">Cyclic Time Slice Queue</small>
+                    </div>
+                  </label>
+                </div>
+
+              </div>
+
+              <!-- Time Quantum Parameter (Only shown for Round Robin) -->
+              <div id="timeQuantumContainer" class="p-2 px-3 bg-secondary-subtle rounded border border-secondary-subtle mb-2" style="display: none;">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                  <div>
+                    <label for="timeQuantumInput" class="form-label fw-bold mb-0 text-uppercase" style="font-size: 0.72rem;">
+                      <i class="bi bi-clock-history text-primary me-1"></i> Time Quantum (q):
+                    </label>
+                    <div class="text-muted" style="font-size: 0.7rem;">Fixed time slice allocated per process</div>
+                  </div>
+                  <div class="d-flex align-items-center gap-1 font-mono">
+                    <input type="number" id="timeQuantumInput" class="form-control form-control-sm text-center fw-bold font-mono" style="width: 70px;" min="1" max="100" value="2" />
+                    <span class="text-muted" style="font-size: 0.75rem;">units</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Algorithm Quick Description -->
+              <div class="p-2 px-3 rounded bg-secondary-subtle border border-secondary-subtle text-secondary" style="font-size: 0.78rem;">
+                <span class="fw-bold text-primary"><i class="bi bi-info-circle-fill me-1"></i> Policy:</span>
+                <span id="algoShortDescription">First-Come, First-Served: Executes processes strictly in order of arrival time without preemption.</span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: Simulation Controls, CPU Live Status & Gantt Chart -->
+        <div class="col-12 col-xl-7">
+          
+          <!-- Simulation Controls Bar -->
+          <div class="sim-controls-bar d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+            <div class="d-flex align-items-center gap-1 flex-wrap">
+              <button id="playBtn" class="btn-density-primary" onclick="runSimulation(true)">
+                <i class="bi bi-play-fill"></i> Animate
+              </button>
+              <button id="instantBtn" class="btn-density-outline" onclick="runSimulation(false)">
+                <i class="bi bi-lightning-fill"></i> Instant
+              </button>
+              <button id="pauseBtn" class="btn-density-outline" onclick="pauseSimulation()" disabled>
+                <i class="bi bi-pause-fill"></i> Pause
+              </button>
+              <button id="stepBtn" class="btn-density-outline" onclick="stepForward()" title="Advance 1 time unit">
+                <i class="bi bi-skip-forward-fill"></i> Step
+              </button>
+              <button id="restartBtn" class="btn-density-outline" onclick="restartSimulation()" title="Replay animation">
+                <i class="bi bi-arrow-repeat"></i>
+              </button>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+              <label for="simSpeedSelect" class="text-secondary fw-bold text-uppercase mb-0" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                Speed:
+              </label>
+              <select id="simSpeedSelect" class="form-select form-select-sm font-mono" style="width: 100px; font-size: 0.75rem;">
+                <option value="1000">0.5x</option>
+                <option value="500" selected>1.0x</option>
+                <option value="250">2.0x</option>
+                <option value="100">5.0x</option>
+              </select>
+              <span id="simulationProgressBadge" class="badge bg-secondary-subtle text-secondary border border-secondary-subtle font-mono px-2 py-1" style="font-size: 0.75rem;">
+                Time: 0
+              </span>
+            </div>
+          </div>
+
+          <!-- Real-Time CPU & Ready Queue Visualization Cards -->
+          <div class="row g-2 mb-3">
+            
+            <!-- CPU Visualizer -->
+            <div class="col-12 col-md-5">
+              <div class="app-card h-100 p-2.5">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <div class="cpu-chip-badge">
+                    <i class="bi bi-cpu"></i> Active CPU
+                  </div>
+                  <span id="cpuStatusBadge" class="badge bg-success font-mono">RUNNING</span>
+                </div>
+
+                <div class="cpu-core-box running" id="cpuCoreVisualizer">
+                  <div class="text-muted text-uppercase font-mono fw-bold" style="font-size: 0.68rem; letter-spacing: 0.08em;">Active Process</div>
+                  <div class="cpu-active-pid" id="cpuActiveProcess">P1</div>
+                  
+                  <div class="d-flex justify-content-around mt-1 pt-1 border-top border-secondary-subtle font-mono">
+                    <div>
+                      <small class="text-muted d-block" style="font-size: 0.65rem;">Time (t)</small>
+                      <span class="fw-bold" id="cpuCurrentTime">0u</span>
+                    </div>
+                    <div>
+                      <small class="text-muted d-block" style="font-size: 0.65rem;">Rem. Burst</small>
+                      <span class="fw-bold text-warning" id="cpuRemainingBurst">5</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ready Queue & Completed Queue -->
+            <div class="col-12 col-md-7">
+              <div class="app-card h-100 p-2.5 d-flex flex-column justify-content-between">
+                <div>
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <span class="fw-bold text-secondary text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.06em;">
+                      <i class="bi bi-arrow-right-circle-fill text-primary me-1"></i> Ready Queue
+                    </span>
+                    <small class="text-muted font-mono" style="font-size: 0.68rem;">Waiting for CPU</small>
+                  </div>
+                  
+                  <div class="ready-queue-track" id="readyQueueTrack">
+                    <!-- Populated dynamically via JS -->
+                    <span class="text-muted fst-italic py-1" style="font-size: 0.75rem;">Queue is empty</span>
+                  </div>
+                </div>
+
+                <div class="mt-2 pt-2 border-top border-secondary-subtle">
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <span class="fw-bold text-secondary text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.05em;">
+                      <i class="bi bi-check2-circle text-success me-1"></i> Completed
+                    </span>
+                  </div>
+                  <div id="completedProcessList" class="d-flex flex-wrap gap-1 font-mono">
+                    <span class="text-muted fst-italic" style="font-size: 0.75rem;">None</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Gantt Chart Card -->
+          <div class="app-card mb-3" id="ganttSection">
+            <div class="card-header-density">
+              <div class="section-indicator-title">
+                <span class="section-indicator-bar"></span>
+                <span>Interactive Gantt Chart</span>
+              </div>
+              <small class="text-muted font-mono" style="font-size: 0.7rem;">Timeline Scale</small>
+            </div>
+            
+            <div class="p-2.5" id="ganttChartContainer">
+              <!-- Dynamically generated Gantt Chart -->
+            </div>
+
+            <div class="px-3 pb-2">
+              <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 pt-2 border-top border-secondary-subtle" style="font-size: 0.72rem;">
+                <div class="d-flex align-items-center gap-3 text-muted">
+                  <span class="d-flex align-items-center gap-1">
+                    <span style="display:inline-block; width:10px; height:10px; background:var(--accent-primary); border-radius:2px;"></span> Active Process
+                  </span>
+                  <span class="d-flex align-items-center gap-1">
+                    <span style="display:inline-block; width:10px; height:10px; background:var(--timeline-idle-bg); border-radius:2px; border:1px solid #4b5563;"></span> CPU Idle
+                  </span>
+                </div>
+                <div class="text-muted font-mono">
+                  <i class="bi bi-cursor me-1"></i> Hover blocks for interval timings
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- =========================================================================
+           RESULTS & PERFORMANCE METRICS SECTION
+           ========================================================================= -->
+      <section id="results" class="mt-3 pt-1">
+        
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+          <div class="d-flex align-items-center gap-2">
+            <span class="section-indicator-bar"></span>
+            <div>
+              <h5 class="fw-bold mb-0 text-uppercase" style="font-size: 0.95rem; letter-spacing: 0.02em;">Scheduling Results &amp; Metrics</h5>
+              <p class="text-secondary mb-0" style="font-size: 0.75rem;">Calculated performance metrics, timeline intervals, and process statistics</p>
+            </div>
+          </div>
+          <div class="d-flex gap-1">
+            <button class="btn btn-density-outline btn-density-sm" onclick="exportResultsPDF()" id="exportPdfBtn">
+              <i class="bi bi-file-earmark-pdf-fill me-1 text-danger"></i> Export PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- 6 Metrics Cards Grid (High Density) -->
+        <div class="row g-2 mb-3">
+          
+          <!-- 1. Average Waiting Time -->
+          <div class="col-6 col-md-4 col-xl-2">
+            <div class="metric-card">
+              <div class="metric-label">Avg Waiting (WT)</div>
+              <div class="metric-value text-warning" id="metricAvgWT">0.00</div>
+            </div>
+          </div>
+
+          <!-- 2. Average Turnaround Time -->
+          <div class="col-6 col-md-4 col-xl-2">
+            <div class="metric-card">
+              <div class="metric-label">Avg Turnaround (TAT)</div>
+              <div class="metric-value text-primary" id="metricAvgTAT">0.00</div>
+            </div>
+          </div>
+
+          <!-- 3. Average Response Time -->
+          <div class="col-6 col-md-4 col-xl-2">
+            <div class="metric-card">
+              <div class="metric-label">Avg Response (RT)</div>
+              <div class="metric-value text-success" id="metricAvgRT">0.00</div>
+            </div>
+          </div>
+
+          <!-- 4. CPU Utilization -->
+          <div class="col-6 col-md-4 col-xl-2">
+            <div class="metric-card">
+              <div class="metric-label">CPU Utilization</div>
+              <div class="metric-value text-info" id="metricCpuUtil">0.0%</div>
+            </div>
+          </div>
+
+          <!-- 5. Throughput -->
+          <div class="col-6 col-md-4 col-xl-2">
+            <div class="metric-card">
+              <div class="metric-label">Throughput</div>
+              <div class="metric-value text-purple" style="color: #8b5cf6;" id="metricThroughput">0.00</div>
+            </div>
+          </div>
+
+          <!-- 6. Context Switches -->
+          <div class="col-6 col-md-4 col-xl-2">
+            <div class="metric-card">
+              <div class="metric-label">Context Switches</div>
+              <div class="metric-value text-danger" id="metricContextSwitches">0</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Process Results Table Card -->
+        <div class="app-card mb-3">
+          <div class="card-header-density">
+            <div class="section-indicator-title">
+              <span class="section-indicator-bar"></span>
+              <span>Simulation Results Table</span>
+            </div>
+            <small class="text-muted font-mono" style="font-size: 0.68rem;">TAT = CT - AT | WT = TAT - BT | RT = Start - AT</small>
+          </div>
+
+          <div class="p-2 px-3">
+            <div class="table-responsive">
+              <table class="table custom-table table-hover align-middle text-nowrap" id="resultsTable">
+                <thead>
+                  <tr>
+                    <th>Proc</th>
+                    <th class="text-center">Arrival (AT)</th>
+                    <th class="text-center">Burst (BT)</th>
+                    <th class="text-center">Priority</th>
+                    <th class="text-center">Completion (CT)</th>
+                    <th class="text-center">Turnaround (TAT)</th>
+                    <th class="text-center">Waiting (WT)</th>
+                    <th class="text-center">Response (RT)</th>
+                  </tr>
+                </thead>
+                <tbody id="resultsTableBody">
+                  <!-- Populated dynamically via JS -->
+                </tbody>
+                <tfoot id="resultsTableFoot">
+                  <!-- Summary row -->
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- =========================================================================
+           ALGORITHM COMPARISON MATRIX (RUN ALL)
+           ========================================================================= -->
+      <section id="comparison" class="mt-3 pt-1 mb-3">
+        <div class="app-card">
+          <div class="card-header-density">
+            <div class="section-indicator-title">
+              <span class="section-indicator-bar" style="background-color: var(--accent-purple);"></span>
+              <span>Algorithm Comparison Benchmark</span>
+            </div>
+            <button class="btn btn-density-primary btn-density-sm" onclick="compareAllAlgorithms()">
+              <i class="bi bi-play-circle-fill me-1"></i> Run Benchmark
+            </button>
+          </div>
+
+          <div class="p-3">
+            <p class="text-secondary mb-2" style="font-size: 0.78rem;">
+              Compare all 6 CPU scheduling policies side-by-side on your current workload. Best values are automatically highlighted.
+            </p>
+
+            <div class="table-responsive">
+              <table class="table custom-table table-hover align-middle text-nowrap" id="comparisonTable">
+                <thead>
+                  <tr>
+                    <th>Algorithm Policy</th>
+                    <th class="text-center">Preemptive</th>
+                    <th class="text-center">Avg WT</th>
+                    <th class="text-center">Avg TAT</th>
+                    <th class="text-center">Avg RT</th>
+                    <th class="text-center">CPU Util %</th>
+                    <th class="text-center">Context Switches</th>
+                  </tr>
+                </thead>
+                <tbody id="comparisonTableBody">
+                  <tr>
+                    <td colspan="7" class="text-center py-3 text-muted">
+                      <button class="btn btn-density-outline btn-density-sm" onclick="compareAllAlgorithms()">
+                        <i class="bi bi-lightning-charge-fill me-1"></i> Click to Run Full Comparison
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="mt-2 p-2 px-3 bg-secondary-subtle rounded border border-secondary-subtle text-secondary" style="font-size: 0.75rem;">
+              <span class="fw-bold text-primary"><i class="bi bi-info-circle-fill me-1"></i> OS Performance Note:</span>
+              <strong>SRTF</strong> is provably optimal for minimizing Average Waiting Time in preemptive scenarios, 
+              while <strong>Round Robin</strong> guarantees fair response time for interactive multi-tasking workloads.
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           CHARTS VISUALIZATION SECTION
+           ========================================================================= -->
+      <section class="mt-3 mb-3">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="section-indicator-bar" style="background-color: var(--accent-cyan);"></span>
+          <div>
+            <h5 class="fw-bold mb-0 text-uppercase" style="font-size: 0.95rem; letter-spacing: 0.02em;">Performance Analytics</h5>
+            <p class="text-secondary mb-0" style="font-size: 0.75rem;">Graphical breakdown of waiting times, turnaround times, and resource utilization</p>
+          </div>
+        </div>
+
+        <div class="row g-2">
+          
+          <!-- Chart 1: Avg WT Comparison -->
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="app-card p-2.5 h-100">
+              <h6 class="fw-bold mb-1 text-primary text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;"><i class="bi bi-bar-chart me-1"></i> Avg Waiting Time</h6>
+              <div class="chart-card-body">
+                <canvas id="chartAvgWT"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart 2: Avg TAT Comparison -->
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="app-card p-2.5 h-100">
+              <h6 class="fw-bold mb-1 text-purple text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em; color:#8b5cf6;"><i class="bi bi-bar-chart me-1"></i> Avg Turnaround Time</h6>
+              <div class="chart-card-body">
+                <canvas id="chartAvgTAT"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart 3: CPU Utilization -->
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="app-card p-2.5 h-100">
+              <h6 class="fw-bold mb-1 text-success text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;"><i class="bi bi-bar-chart me-1"></i> CPU Utilization %</h6>
+              <div class="chart-card-body">
+                <canvas id="chartCpuUtil"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart 4: Current Process-wise Breakdown -->
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="app-card p-2.5 h-100">
+              <h6 class="fw-bold mb-1 text-warning text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;"><i class="bi bi-bar-chart me-1"></i> Process Breakdown</h6>
+              <div class="chart-card-body">
+                <canvas id="chartProcessBreakdown"></canvas>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           EDUCATIONAL & ALGORITHMS THEORY SECTION
+           ========================================================================= -->
+      <section id="algorithms" class="mt-3 pt-1 mb-3">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="section-indicator-bar" style="background-color: var(--accent-orange);"></span>
+          <div>
+            <h5 class="fw-bold mb-0 text-uppercase" style="font-size: 0.95rem; letter-spacing: 0.02em;">Operating Systems Scheduling Theory</h5>
+            <p class="text-secondary mb-0" style="font-size: 0.75rem;">Definitions, principles, trade-offs, and preemption comparisons</p>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          
+          <!-- Theory Accordion -->
+          <div class="col-12 col-lg-7">
+            <div class="accordion" id="algoTheoryAccordion">
+              
+              <!-- 1. FCFS -->
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingFCFS">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFCFS" aria-expanded="true" aria-controls="collapseFCFS">
+                    <span class="fw-bold me-2">1. First-Come, First-Served (FCFS)</span>
+                    <span class="badge bg-success-subtle text-success ms-auto me-2 font-mono">Non-Preemptive</span>
+                  </button>
+                </h2>
+                <div id="collapseFCFS" class="accordion-collapse collapse show" aria-labelledby="headingFCFS" data-bs-parent="#algoTheoryAccordion">
+                  <div class="accordion-body">
+                    <p><strong>Definition:</strong> Allocates CPU to processes in strict chronological order of arrival in ready queue (FIFO).</p>
+                    <div class="row g-2 mb-2">
+                      <div class="col-sm-6">
+                        <strong class="text-success"><i class="bi bi-check-circle me-1"></i> Advantages:</strong>
+                        <ul class="mb-0 ps-3">
+                          <li>Simple to implement via FIFO queue.</li>
+                          <li>No starvation; every process runs.</li>
+                        </ul>
+                      </div>
+                      <div class="col-sm-6">
+                        <strong class="text-danger"><i class="bi bi-x-circle me-1"></i> Disadvantages:</strong>
+                        <ul class="mb-0 ps-3">
+                          <li><strong>Convoy Effect:</strong> Short processes stuck behind long ones.</li>
+                          <li>Suboptimal average waiting time.</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. SJF -->
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingSJF">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSJF" aria-expanded="false" aria-controls="collapseSJF">
+                    <span class="fw-bold me-2">2. Shortest Job First (SJF - Non-Preemptive)</span>
+                    <span class="badge bg-success-subtle text-success ms-auto me-2 font-mono">Non-Preemptive</span>
+                  </button>
+                </h2>
+                <div id="collapseSJF" class="accordion-collapse collapse" aria-labelledby="headingSJF" data-bs-parent="#algoTheoryAccordion">
+                  <div class="accordion-body">
+                    <p><strong>Definition:</strong> Selects process with smallest CPU burst time among arrived candidates.</p>
+                    <div class="row g-2 mb-2">
+                      <div class="col-sm-6">
+                        <strong class="text-success"><i class="bi bi-check-circle me-1"></i> Advantages:</strong>
+                        <ul class="mb-0 ps-3">
+                          <li>Provably optimal average waiting time for non-preemptive algorithms.</li>
+                        </ul>
+                      </div>
+                      <div class="col-sm-6">
+                        <strong class="text-danger"><i class="bi bi-x-circle me-1"></i> Disadvantages:</strong>
+                        <ul class="mb-0 ps-3">
+                          <li>Future CPU bursts hard to predict.</li>
+                          <li>Potential starvation for long burst jobs.</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. SRTF -->
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingSRTF">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSRTF" aria-expanded="false" aria-controls="collapseSRTF">
+                    <span class="fw-bold me-2">3. Shortest Remaining Time First (SRTF)</span>
+                    <span class="badge bg-primary-subtle text-primary ms-auto me-2 font-mono">Preemptive</span>
+                  </button>
+                </h2>
+                <div id="collapseSRTF" class="accordion-collapse collapse" aria-labelledby="headingSRTF" data-bs-parent="#algoTheoryAccordion">
+                  <div class="accordion-body">
+                    <p><strong>Definition:</strong> Preemptive SJF. If a newly arrived process has less remaining time than current executing job, CPU is preempted.</p>
+                    <div class="row g-2 mb-2">
+                      <div class="col-sm-6">
+                        <strong class="text-success"><i class="bi bi-check-circle me-1"></i> Advantages:</strong>
+                        <ul class="mb-0 ps-3">
+                          <li>Lowest overall average waiting time among all scheduling algorithms.</li>
+                        </ul>
+                      </div>
+                      <div class="col-sm-6">
+                        <strong class="text-danger"><i class="bi bi-x-circle me-1"></i> Disadvantages:</strong>
+                        <ul class="mb-0 ps-3">
+                          <li>Higher context switching overhead.</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4. Priority Scheduling -->
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingPriority">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePriority" aria-expanded="false" aria-controls="collapsePriority">
+                    <span class="fw-bold me-2">4. Priority Scheduling (NP &amp; Preemptive)</span>
+                    <span class="badge bg-info-subtle text-info ms-auto me-2 font-mono">Dual Mode</span>
+                  </button>
+                </h2>
+                <div id="collapsePriority" class="accordion-collapse collapse" aria-labelledby="headingPriority" data-bs-parent="#algoTheoryAccordion">
+                  <div class="accordion-body">
+                    <p><strong>Definition:</strong> CPU allocated to process with highest priority (lower integer = higher priority in this simulator).</p>
+                    <div class="row g-2 mb-2">
+                      <div class="col-sm-6">
+                        <strong class="text-success"><i class="bi bi-check-circle me-1"></i> Advantages:</strong>
+                        <ul class="mb-0 ps-3">
+                          <li>Guarantees mission-critical OS tasks run first.</li>
+                        </ul>
+                      </div>
+                      <div class="col-sm-6">
+                        <strong class="text-danger"><i class="bi bi-x-circle me-1"></i> Disadvantages:</strong>
+                        <ul class="mb-0 ps-3">
+                          <li>Starvation of low-priority jobs (solved via Aging).</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 5. Round Robin -->
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingRR">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRR" aria-expanded="false" aria-controls="collapseRR">
+                    <span class="fw-bold me-2">5. Round Robin (RR)</span>
+                    <span class="badge bg-primary-subtle text-primary ms-auto me-2 font-mono">Preemptive</span>
+                  </button>
+                </h2>
+                <div id="collapseRR" class="accordion-collapse collapse" aria-labelledby="headingRR" data-bs-parent="#algoTheoryAccordion">
+                  <div class="accordion-body">
+                    <p><strong>Definition:</strong> Allocates a fixed time slice (Quantum <em>q</em>) cyclically across all ready processes.</p>
+                    <div class="row g-2 mb-2">
+                      <div class="col-sm-6">
+                        <strong class="text-success"><i class="bi bi-check-circle me-1"></i> Advantages:</strong>
+                        <ul class="mb-0 ps-3">
+                          <li>Fair CPU allocation with zero starvation.</li>
+                          <li>Ideal for interactive time-sharing systems.</li>
+                        </ul>
+                      </div>
+                      <div class="col-sm-6">
+                        <strong class="text-danger"><i class="bi bi-x-circle me-1"></i> Disadvantages:</strong>
+                        <ul class="mb-0 ps-3">
+                          <li>High context switching if quantum <em>q</em> is too small.</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Preemptive vs Non-Preemptive Comparison Table -->
+          <div class="col-12 col-lg-5">
+            <div class="app-card h-100 p-3">
+              <h6 class="fw-bold text-primary mb-2 text-uppercase" style="font-size: 0.78rem; letter-spacing: 0.05em;">
+                <i class="bi bi-intersect me-1"></i> Preemptive vs. Non-Preemptive
+              </h6>
+              
+              <div class="table-responsive">
+                <table class="table custom-table table-bordered align-middle" style="font-size: 0.75rem;">
+                  <thead>
+                    <tr>
+                      <th>Parameter</th>
+                      <th>Preemptive</th>
+                      <th>Non-Preemptive</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="fw-bold">Interruption</td>
+                      <td>CPU can be forcibly reassigned</td>
+                      <td>Runs until completion or I/O block</td>
+                    </tr>
+                    <tr>
+                      <td class="fw-bold">Overhead</td>
+                      <td>Higher context switching</td>
+                      <td>Low context switching</td>
+                    </tr>
+                    <tr>
+                      <td class="fw-bold">Response Time</td>
+                      <td>Fast; ideal for interactive OS</td>
+                      <td>Slow for queued short jobs</td>
+                    </tr>
+                    <tr>
+                      <td class="fw-bold">Starvation</td>
+                      <td>Possible for long/low-priority jobs</td>
+                      <td>Low (except pure SJF)</td>
+                    </tr>
+                    <tr>
+                      <td class="fw-bold">Policies</td>
+                      <td>SRTF, Priority (P), Round Robin</td>
+                      <td>FCFS, SJF (NP), Priority (NP)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- =========================================================================
+           FORMULAS & CALCULATION REFERENCE SECTION
+           ========================================================================= -->
+      <section id="formulas" class="mt-3 pt-1 mb-4">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="section-indicator-bar" style="background-color: var(--accent-primary);"></span>
+          <div>
+            <h5 class="fw-bold mb-0 text-uppercase" style="font-size: 0.95rem; letter-spacing: 0.02em;">OS Scheduling Formulas Reference</h5>
+            <p class="text-secondary mb-0" style="font-size: 0.75rem;">Standard formulas used in operating system theory and academic examinations</p>
+          </div>
+        </div>
+
+        <div class="row g-2">
+          
+          <div class="col-12 col-md-4">
+            <div class="app-card p-2.5 h-100">
+              <div class="d-flex align-items-center gap-2 text-primary fw-bold mb-1" style="font-size: 0.78rem;">
+                <i class="bi bi-calculator-fill"></i>
+                <span>Turnaround Time (TAT)</span>
+              </div>
+              <div class="formula-box mb-1 text-primary">
+                TAT = Completion Time (CT) − Arrival Time (AT)
+              </div>
+              <small class="text-secondary" style="font-size: 0.72rem;">
+                Total duration elapsed from process arrival to final completion.
+              </small>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <div class="app-card p-2.5 h-100">
+              <div class="d-flex align-items-center gap-2 text-warning fw-bold mb-1" style="font-size: 0.78rem;">
+                <i class="bi bi-hourglass-bottom"></i>
+                <span>Waiting Time (WT)</span>
+              </div>
+              <div class="formula-box mb-1 text-warning">
+                WT = Turnaround Time (TAT) − Burst Time (BT)
+              </div>
+              <small class="text-secondary" style="font-size: 0.72rem;">
+                Cumulative time spent in ready queue waiting for CPU allocation.
+              </small>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <div class="app-card p-2.5 h-100">
+              <div class="d-flex align-items-center gap-2 text-success fw-bold mb-1" style="font-size: 0.78rem;">
+                <i class="bi bi-lightning-fill"></i>
+                <span>Response Time (RT)</span>
+              </div>
+              <div class="formula-box mb-1 text-success">
+                RT = First Start Time − Arrival Time (AT)
+              </div>
+              <small class="text-secondary" style="font-size: 0.72rem;">
+                Duration from arrival until CPU is first granted to the process.
+              </small>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <div class="app-card p-2.5 h-100">
+              <div class="d-flex align-items-center gap-2 text-info fw-bold mb-1" style="font-size: 0.78rem;">
+                <i class="bi bi-cpu"></i>
+                <span>CPU Utilization (%)</span>
+              </div>
+              <div class="formula-box mb-1 text-info">
+                CPU Util = (Busy Time / Total Time) × 100%
+              </div>
+              <small class="text-secondary" style="font-size: 0.72rem;">
+                Percentage of execution time during which CPU was non-idle.
+              </small>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <div class="app-card p-2.5 h-100">
+              <div class="d-flex align-items-center gap-2 text-purple fw-bold mb-1" style="font-size: 0.78rem; color: #8b5cf6;">
+                <i class="bi bi-speedometer2"></i>
+                <span>Throughput</span>
+              </div>
+              <div class="formula-box mb-1" style="color: #8b5cf6;">
+                Throughput = Completed Processes / Total Time
+              </div>
+              <small class="text-secondary" style="font-size: 0.72rem;">
+                Number of completed processes delivered per unit of simulation time.
+              </small>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <div class="app-card p-2.5 h-100">
+              <div class="d-flex align-items-center gap-2 text-danger fw-bold mb-1" style="font-size: 0.78rem;">
+                <i class="bi bi-arrow-left-right"></i>
+                <span>Context Switches</span>
+              </div>
+              <div class="formula-box mb-1 text-danger">
+                Count of (Process Preemptions: Pᵢ ➔ Pⱼ)
+              </div>
+              <small class="text-secondary" style="font-size: 0.72rem;">
+                Tracks overhead transitions between distinct scheduled processes.
+              </small>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- High Density Footer Status Bar -->
+    <footer class="footer-density">
+      <div class="d-flex align-items-center gap-2">
+        <span class="status-dot"></span>
+        <span class="fw-bold">CPU-Scheduler</span>
+        <span class="text-muted">&bull;</span>
+        <span>Interactive Operating Systems Simulation Suite</span>
+      </div>
+    </footer>
+
+    <!-- Bootstrap 5 Bundle JS via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    
+    <!-- Chart.js via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+    <!-- jsPDF & jsPDF-AutoTable for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Custom Simulator Script -->
+    <script src="/script.js"></script>
+  </body>
+</html>

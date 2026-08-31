@@ -1,0 +1,6 @@
+{
+  "name": "CPU Scheduling Simulator",
+  "description": "Interactive Operating Systems CPU Scheduling Simulator with real-time Gantt charts, metrics, Ready Queue & CPU animation, and algorithm comparisons.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

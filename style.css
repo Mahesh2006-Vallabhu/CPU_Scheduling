@@ -1,0 +1,770 @@
+/* ==========================================================================
+   CPU Scheduling Simulator - "High Density" Theme Stylesheet
+   Operating Systems Interactive Visualizer
+   ========================================================================== */
+
+:root {
+  /* High Density Dark Theme (Default) */
+  --bg-primary: #0F172A;
+  --bg-secondary: #1E293B;
+  --bg-card: #1E293B;
+  --bg-card-hover: #243247;
+  --bg-input: #0F172A;
+  --bg-surface: #090E1A;
+  
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  
+  --border-color: #334155;
+  --border-subtle: #1E293B;
+  --border-focus: #3B82F6;
+  
+  --accent-primary: #2563EB;
+  --accent-primary-hover: #3B82F6;
+  --accent-success: #10B981;
+  --accent-warning: #F59E0B;
+  --accent-danger: #EF4444;
+  --accent-purple: #8B5CF6;
+  --accent-orange: #F97316;
+  --accent-cyan: #06B6D4;
+  
+  --cpu-glow: rgba(37, 99, 235, 0.25);
+  --card-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.35);
+  --timeline-idle-bg: repeating-linear-gradient(45deg, #1e293b, #1e293b 8px, #0f172a 8px, #0f172a 16px);
+  
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+[data-bs-theme="light"] {
+  /* High Density Light Theme */
+  --bg-primary: #F8FAFC;
+  --bg-secondary: #F1F5F9;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F8FAFC;
+  --bg-input: #F8FAFC;
+  --bg-surface: #E2E8F0;
+  
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  
+  --border-color: #E2E8F0;
+  --border-subtle: #F1F5F9;
+  --border-focus: #2563EB;
+  
+  --accent-primary: #2563EB;
+  --accent-primary-hover: #1D4ED8;
+  --accent-success: #059669;
+  --accent-warning: #D97706;
+  --accent-danger: #DC2626;
+  --accent-purple: #7C3AED;
+  --accent-orange: #EA580C;
+  --accent-cyan: #0891B2;
+  
+  --cpu-glow: rgba(37, 99, 235, 0.12);
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --timeline-idle-bg: repeating-linear-gradient(45deg, #e2e8f0, #e2e8f0 8px, #cbd5e1 8px, #cbd5e1 16px);
+}
+
+/* ==========================================================================
+   Base Elements & Global Resets
+   ========================================================================== */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  line-height: 1.5;
+  font-size: 0.875rem;
+  overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.font-mono, [class*="mono"], .font-monospace {
+  font-family: var(--font-mono) !important;
+}
+
+/* ==========================================================================
+   High Density Navigation Header
+   ========================================================================== */
+.navbar-custom {
+  background-color: var(--bg-secondary) !important;
+  border-bottom: 1px solid var(--border-color);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  padding: 0.45rem 0;
+}
+
+.nav-brand-box {
+  background-color: var(--accent-primary);
+  color: #ffffff;
+  padding: 0.45rem;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-title-main {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.nav-title-sub {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  margin-top: 0.15rem;
+}
+
+.nav-link-density {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary) !important;
+  padding: 0.35rem 0.65rem !important;
+  border-radius: 0.3rem;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.nav-link-density:hover {
+  color: var(--text-primary) !important;
+  background-color: rgba(37, 99, 235, 0.08);
+}
+
+.nav-link-density.active {
+  color: var(--accent-primary-hover) !important;
+  background-color: rgba(37, 99, 235, 0.12);
+  border-bottom: 2px solid var(--accent-primary);
+}
+
+/* ==========================================================================
+   Hero / Header Section
+   ========================================================================== */
+.hero-section {
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 1.5rem 0 1.25rem;
+}
+
+.hero-pill {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  background: rgba(37, 99, 235, 0.12);
+  color: var(--accent-primary);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.hero-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.hero-lead {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  max-width: 680px;
+  margin: 0.35rem auto 1rem;
+}
+
+/* ==========================================================================
+   Cards & Layout Components
+   ========================================================================== */
+.app-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.app-card:hover {
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.card-header-density {
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.6rem 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-indicator-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin-bottom: 0;
+}
+
+.section-indicator-bar {
+  width: 3.5px;
+  height: 12px;
+  background-color: var(--accent-primary);
+  border-radius: 9999px;
+  display: inline-block;
+}
+
+/* ==========================================================================
+   Density Buttons
+   ========================================================================== */
+.btn-density-primary {
+  background-color: var(--accent-primary);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.35rem 0.85rem;
+  border-radius: 0.3rem;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn-density-primary:hover {
+  background-color: var(--accent-primary-hover);
+  color: #ffffff;
+}
+
+.btn-density-outline {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.35rem 0.85rem;
+  border-radius: 0.3rem;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn-density-outline:hover {
+  background-color: var(--bg-card-hover);
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.btn-density-sm {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.68rem;
+}
+
+/* Preset test cases button group */
+.preset-btn {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.3rem;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+}
+
+.preset-btn:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background-color: rgba(37, 99, 235, 0.06);
+}
+
+/* ==========================================================================
+   High Density Tables & Inputs
+   ========================================================================== */
+.form-control, .form-select {
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.3rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--border-focus) !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25) !important;
+}
+
+.custom-table {
+  color: var(--text-primary) !important;
+  vertical-align: middle;
+  margin-bottom: 0;
+  font-size: 0.78rem;
+}
+
+.custom-table th {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-muted) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  font-weight: 700;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.45rem 0.65rem;
+  white-space: nowrap;
+}
+
+.custom-table td {
+  border-bottom: 1px solid var(--border-color) !important;
+  background-color: transparent !important;
+  color: var(--text-primary) !important;
+  padding: 0.4rem 0.65rem;
+  font-family: var(--font-mono);
+}
+
+.custom-table tr:hover td {
+  background-color: var(--bg-card-hover) !important;
+}
+
+/* Process Pill & Color Dot */
+.process-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+}
+
+.process-color-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Algorithm Card Selection
+   ========================================================================== */
+.algo-card-label {
+  display: block;
+  cursor: pointer;
+  height: 100%;
+}
+
+.algo-card-label input[type="radio"] {
+  display: none;
+}
+
+.algo-card-inner {
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-input);
+  border-radius: 0.4rem;
+  padding: 0.6rem 0.75rem;
+  height: 100%;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.algo-card-inner:hover {
+  border-color: var(--text-muted);
+}
+
+.algo-card-label input[type="radio"]:checked + .algo-card-inner {
+  border-color: var(--accent-primary);
+  background-color: rgba(37, 99, 235, 0.08);
+  box-shadow: 0 0 0 1.5px var(--accent-primary);
+}
+
+.algo-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ==========================================================================
+   Simulation Controls Bar
+   ========================================================================== */
+.sim-controls-bar {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.85rem;
+}
+
+/* ==========================================================================
+   High Density CPU Core Visualizer
+   ========================================================================== */
+.cpu-core-box {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 0.85rem;
+  position: relative;
+  text-align: center;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.cpu-core-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: var(--accent-success);
+  transition: background-color 0.2s ease;
+}
+
+.cpu-core-box.idle::before {
+  background-color: var(--text-muted);
+}
+
+.cpu-core-box.running {
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.15);
+}
+
+.cpu-chip-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: rgba(37, 99, 235, 0.15);
+  color: var(--accent-primary);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cpu-active-pid {
+  font-family: var(--font-mono);
+  font-size: 1.85rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0.2rem 0;
+  line-height: 1.1;
+}
+
+/* ==========================================================================
+   Ready Queue Track (Connected High Density Blocks)
+   ========================================================================== */
+.ready-queue-track {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.45rem 0.5rem;
+  min-height: 52px;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+}
+
+.queue-process-item {
+  flex-shrink: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 0.3rem;
+  padding: 0.25rem 0.55rem;
+  min-width: 65px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  animation: queue-enter 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes queue-enter {
+  from {
+    transform: scale(0.8) translateY(4px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+  }
+}
+
+.queue-arrow {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Gantt Chart (High Density Streamlined Bar)
+   ========================================================================== */
+.gantt-scroll-container {
+  overflow-x: auto;
+  padding: 0.5rem 0.25rem 0.25rem;
+  position: relative;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+}
+
+.gantt-chart-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 100%;
+  width: max-content;
+}
+
+.gantt-blocks-row {
+  display: flex;
+  height: 44px;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.gantt-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  position: relative;
+  border-right: 1px solid rgba(15, 23, 42, 0.4);
+  transition: filter 0.15s ease;
+  cursor: pointer;
+  user-select: none;
+  min-width: 32px;
+  font-size: 0.78rem;
+  line-height: 1.1;
+}
+
+.gantt-block:hover {
+  filter: brightness(1.15);
+  z-index: 2;
+}
+
+.gantt-block.idle-block {
+  background: var(--timeline-idle-bg) !important;
+  color: var(--text-muted) !important;
+  font-weight: 600;
+  font-style: italic;
+  border-right: 1px dashed var(--border-color);
+}
+
+.gantt-time-labels {
+  display: flex;
+  position: relative;
+  height: 22px;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+}
+
+.gantt-time-tick {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.gantt-time-tick::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 3px;
+  background-color: var(--border-color);
+}
+
+/* ==========================================================================
+   High Density Metric Cards
+   ========================================================================== */
+.metric-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 0.45rem;
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--card-shadow);
+  transition: border-color 0.15s ease;
+}
+
+.metric-card:hover {
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.metric-label {
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.15rem;
+}
+
+.metric-value {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+/* Comparison Highlights & Badges */
+.best-cell {
+  background-color: rgba(16, 185, 129, 0.12) !important;
+  color: var(--accent-success) !important;
+  font-weight: 700;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+.badge-winner {
+  background-color: var(--accent-success);
+  color: #fff;
+  font-size: 0.62rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.2rem;
+  margin-left: 0.3rem;
+  vertical-align: middle;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Chart Canvas Body */
+.chart-card-body {
+  position: relative;
+  height: 240px;
+  width: 100%;
+}
+
+/* ==========================================================================
+   Accordion for Theory & Reference
+   ========================================================================== */
+.accordion-item {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  margin-bottom: 0.5rem;
+  border-radius: 0.4rem !important;
+  overflow: hidden;
+}
+
+.accordion-button {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 0.6rem 0.9rem;
+  box-shadow: none !important;
+  border: none;
+}
+
+.accordion-button:not(.collapsed) {
+  color: var(--accent-primary-hover) !important;
+  background-color: rgba(37, 99, 235, 0.08) !important;
+}
+
+.accordion-button::after {
+  filter: invert(0.5);
+  transform: scale(0.8);
+}
+
+[data-bs-theme="dark"] .accordion-button::after {
+  filter: invert(1);
+}
+
+.accordion-body {
+  background-color: var(--bg-card) !important;
+  color: var(--text-secondary) !important;
+  border-top: 1px solid var(--border-color);
+  padding: 0.85rem;
+  font-size: 0.8rem;
+}
+
+/* Formula Block Reference */
+.formula-box {
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 0.35rem;
+  padding: 0.45rem 0.65rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Scrollbars & High Density Footer
+   ========================================================================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+.footer-density {
+  background-color: var(--bg-primary);
+  border-top: 1px solid var(--border-color);
+  padding: 0.65rem 1.25rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--accent-success);
+  display: inline-block;
+}
